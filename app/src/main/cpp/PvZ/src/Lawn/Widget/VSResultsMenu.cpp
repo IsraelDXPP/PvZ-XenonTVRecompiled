@@ -1,0 +1,151 @@
+/*
+ * Copyright (C) 2023-2026  PvZ TV Touch Team
+ *
+ * This file is part of PlantsVsZombies-AndroidTV.
+ *
+ * PlantsVsZombies-AndroidTV is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * PlantsVsZombies-AndroidTV is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * PlantsVsZombies-AndroidTV.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "PvZ/Lawn/Widget/VSResultsMenu.h"
+#include "Homura/Logger.h"
+#include "PvZ/Lawn/LawnApp.h"
+#include "PvZ/NetPlay.h"
+#include "PvZ/SexyAppFramework/Graphics/Graphics.h"
+#include "PvZ/TodLib/Common/TodCommon.h"
+
+#include <unistd.h>
+
+using namespace Sexy;
+
+
+void VSResultsMenu::_constructor() {
+    old_VSResultsMenu_Constructor(this);
+    gVSResultRequestState = -1;
+    gNetDelayNow = 0; // 清除旧的延时数据
+}
+
+void VSResultsMenu::processClientEvent(const BaseEvent *event) {
+    LOG_DEBUG("TYPE:{}", (int)event->type);
+    switch (event->type) {
+        case EVENT_CLIENT_VSRESULT_BUTTON_DEPRESS: {
+            auto *event1 = static_cast<const U8_Event *>(event);
+            int anId = event1->data;
+            gVSResultRequestState = anId;
+        } break;
+        default:
+            break;
+    }
+}
+
+
+void VSResultsMenu::processServerEvent(const BaseEvent *event) {
+    LOG_DEBUG("TYPE:{}", (int)event->type);
+    switch (event->type) {
+        case EVENT_SERVER_VSRESULT_BUTTON_DEPRESS: {
+            auto *event1 = static_cast<const U8_Event *>(event);
+            int anId = event1->data;
+            mResultsButtonId = anId;
+            OnExit();
+        } break;
+        default:
+            break;
+    }
+}
+
+void VSResultsMenu::Update() {
+    // 记录当前游戏状态
+    old_VSResultsMenu_Update(this);
+}
+
+void VSResultsMenu::OnExit() {
+    if (mResultsButtonId == VSResultsMenu_Quit_VS) {
+        gLawnApp->ShowMainMenuScreen();
+        gLawnApp->KillVSResultsScreen();
+    } else if (mResultsButtonId == VSResultsMenu_Play_Again) {
+        //        gLawnApp->PreNewGame(GameMode::GAMEMODE_MP_VS, false);
+        // 改为返回关卡选择页面
+        gLawnApp->ShowChallengeScreen(ChallengePage::CHALLENGE_PAGE_VS);
+        gLawnApp->KillVSResultsScreen();
+    }
+}
+
+void VSResultsMenu::ButtonDepress(int theId) {
+    if (mIsFading)
+        return;
+
+    if (theId == VSResultsMenu::VSResultsMenu_Quit_VS) {
+        mResultsButtonId = theId;
+        OnExit();
+        return;
+    }
+
+    if (gTcpConnected) {
+        // 客户端点击再来一局
+        U8_Event event = {{EventType::EVENT_CLIENT_VSRESULT_BUTTON_DEPRESS}, uint8_t(theId)};
+        netplay::PutEvent(event);
+        gVSResultRequestState = theId;
+        return;
+    }
+
+    if (gTcpClientSocket >= 0) {
+        U8_Event event = {{EventType::EVENT_SERVER_VSRESULT_BUTTON_DEPRESS}, uint8_t(theId)};
+        netplay::PutEvent(event);
+    }
+
+    mResultsButtonId = theId;
+    OnExit();
+}
+
+void VSResultsMenu::Draw(Graphics *g) {
+    old_VSResultsMenu_Draw(this, g);
+
+    if (gTcpConnected) {
+        switch (gVSResultRequestState) {
+            case VSResultsMenu::VSResultsMenu_Play_Again:
+                TodDrawString(g, "[VS_RESULT_REMIND_HOST_PLAY_AGAIN]", 400, -20, Sexy::FONT_HOUSEOFTERROR28, Color(0, 205, 0, 255), DrawStringJustification::DS_ALIGN_CENTER);
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (gTcpClientSocket >= 0) {
+        switch (gVSResultRequestState) {
+            case VSResultsMenu::VSResultsMenu_Play_Again:
+                TodDrawString(g, "[VS_RESULT_OPPONENT_REQUEST_PLAY_AGAIN]", 400, -20, Sexy::FONT_HOUSEOFTERROR28, Color(0, 205, 0, 255), DrawStringJustification::DS_ALIGN_CENTER);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+
+void VSResultsMenu::DrawInfoBox(Sexy::Graphics *a2, int a3) {
+    // Sexy::Image* tmp = Sexy::IMAGE_NO_GAMERPIC;
+    // if (addonImages.gamerpic == nullptr && addonImages.zombatar_portrait != nullptr) {
+    // int width = tmp->mWidth;
+    // int height = tmp->mHeight;
+    // addonImages.gamerpic = (Sexy::Image*) operator new(sizeof(Sexy::Image));
+    // Sexy_MemoryImage_MemoryImage(addonImages.gamerpic);
+    // Sexy_MemoryImage_Create(addonImages.gamerpic,width,height);
+    // Sexy::Graphics graphics;
+    // Sexy_Graphics_Graphics2(&graphics,addonImages.gamerpic);
+    // TodDrawImageScaledF(&graphics,addonImages.zombatar_portrait,0,0,width / addonImages.zombatar_portrait->mWidth,height / addonImages.zombatar_portrait->mHeight);
+    // Sexy_Graphics_Delete2(&graphics);
+    // Sexy::IMAGE_NO_GAMERPIC = addonImages.gamerpic;
+    // }
+    old_VSResultsMenu_DrawInfoBox(this, a2, a3);
+    // Sexy::IMAGE_NO_GAMERPIC = tmp;
+}

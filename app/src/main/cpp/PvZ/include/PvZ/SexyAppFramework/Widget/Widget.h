@@ -1,0 +1,93 @@
+/*
+ * Copyright (C) 2023-2026  PvZ TV Touch Team
+ *
+ * This file is part of PlantsVsZombies-AndroidTV.
+ *
+ * PlantsVsZombies-AndroidTV is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * PlantsVsZombies-AndroidTV is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * PlantsVsZombies-AndroidTV.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef PVZ_SEXYAPPFRAMEWORK_WIDGET_WIDGET_H
+#define PVZ_SEXYAPPFRAMEWORK_WIDGET_WIDGET_H
+
+#include "Homura/TypeUtils.h"
+#include "PvZ/SexyAppFramework/Graphics/Color.h"
+#include "PvZ/SexyAppFramework/Graphics/Graphics.h"
+#include "PvZ/SexyAppFramework/Misc/Common.h"
+#include "PvZ/SexyAppFramework/Misc/KeyCodes.h"
+
+#include "Insets.h"
+#include "WidgetContainer.h"
+
+#include <vector>
+
+namespace Sexy {
+
+class WidgetManager;
+
+using ColorVector = std::vector<Color>;
+
+class Widget : public WidgetContainer {
+public:
+    bool mVisible;                        // 116
+    bool mMouseVisible;                   // 117
+    bool mDisabled;                       // 118
+    bool mHasFocus;                       // 119
+    bool mIsDown;                         // 120
+    bool mIsOver;                         // 121
+    bool mHasTransparencies;              // 122
+    homura::Storage<ColorVector> mColors; // 31 ~ 33
+    Insets mMouseInsets;                  // 34 ~ 37
+    bool mDoFinger;                       // 152
+    bool mWantsFocus;                     // 153
+    int unk1[10];                         // 38 ~ 47
+    Widget *mFocusLinks[4];               // 48 ~ 52 ，上下左右
+    int unk2[2];                          // 53 ~ 54
+    Widget *mFocusedChildWidget;          // 55
+    int unk3[4];                          // 56 ~ 59
+    int *mAnimatorForState[4];            // 60 ~ 63
+    // 大小64个整数！
+
+    void Resize(int theX, int theY, int theWidth, int theHeight) {
+        reinterpret_cast<void (*)(Widget *, int, int, int, int)>(Sexy_Widget_ResizeAddr)(this, theX, theY, theWidth, theHeight);
+    }
+    void SetVisible(bool isVisible) {
+        reinterpret_cast<void (*)(Widget *, bool)>(Sexy_Widget_SetVisibleAddr)(this, isVisible);
+    }
+    void Move(int theNewX, int theNewY) {
+        reinterpret_cast<void (*)(Widget *, int, int)>(Sexy_Widget_MoveAddr)(this, theNewX, theNewY);
+    }
+    void DeferOverlay(int thePriority = 0) {
+        reinterpret_cast<void (*)(Widget *, int)>(Sexy_Widget_DeferOverlayAddr)(this, thePriority);
+    }
+
+    void MarkDirty();
+    void AddWidget(Widget *theWidget);
+    void RemoveWidget(Widget *theWidget);
+    Widget *FindWidget(int theId);
+
+protected:
+    Widget() = default;
+    ~Widget() = default;
+
+    void _constructor() {
+        reinterpret_cast<void (*)(Widget *)>(Sexy_Widget__constructorAddr)(this);
+    }
+    void _destructor() {
+        reinterpret_cast<void (*)(Widget *)>(Sexy_Widget__destructorAddr)(this);
+    }
+};
+
+} // namespace Sexy
+
+#endif // PVZ_SEXYAPPFRAMEWORK_WIDGET_WIDGET_H

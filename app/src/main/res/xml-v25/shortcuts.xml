@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/icon"
+        android:shortcutId="MyCollection"
+        android:shortcutShortLabel="@string/app_name">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.transmension.mobile.MainActivity"
+            android:targetPackage="com.trans.pvztv" />
+        <categories android:name="android.shortcut.conversation" />
+        <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
+    </shortcut>
+</shortcuts>
