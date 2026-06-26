@@ -18,6 +18,7 @@
  */
 
 #include "Homura/ExceptionUtils.h"
+#include "Homura/MemoryUtils.h"
 #include "PvZ/GlobalVariable.h"
 #include "PvZ/HookInit.h"
 #include "PvZ/Symbols.h"
