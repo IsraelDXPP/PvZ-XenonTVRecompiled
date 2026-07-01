@@ -28,6 +28,7 @@ void InitIntroVideo();
 inline void CallHook() {
     InitHookFunction();
     InitVTableHookFunction();
+    InitOpenSL();
     // InitIntroVideo();
 }
 

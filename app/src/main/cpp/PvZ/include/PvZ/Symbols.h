@@ -849,6 +849,7 @@ inline void *Sexy_DrawImageBoxAddr;
 
 inline void *Reanimation_ReanimationAddr;
 inline void *Reanimation_ReanimationInitializeTypeAddr;
+inline void *Sexy_Widget_DrawAddr;
 inline void *Reanimation_DrawAddr;
 inline void *Reanimation_DrawTrackAddr;
 inline void *Reanimation_Delete2Addr;
@@ -899,6 +900,9 @@ inline void *Sexy_ExtractLoadingSoundsResourcesAddr;
 inline void *TodFoley_IsFoleyPlayingAddr;
 inline void *TodFoley_StopFoleyAddr;
 inline void *TodFoley_CancelPausedFoleyAddr;
+inline void *TodFoley_GamePauseAddr;
+inline void *TodFoley_RehookupSoundWithMusicVolumeAddr;
+inline void *TodFoleyInitializeAddr;
 inline void *SoundSystemFindInstanceAddr;
 inline void *TodStringListLoadAddr;
 inline void *TodReplaceStringAddr;
@@ -958,6 +962,24 @@ inline void *TitleScreen_TitleScreenAddr;
 inline void *TitleScreen_DrawAddr;
 inline void *TitleScreen_UpdateAddr;
 inline void *TitleScreen_SwitchStateAddr;
+
+inline void *Sexy_Widget_UpdateAddr;
+inline void *Sexy_SexyAppBase_StartLoadingThreadAddr;
+inline void *Sexy_GetEnvOptionAddr;
+inline void *EffectSystem_UpdateAddr;
+inline void *Sexy_SOUND_LOADINGBAR_FLOWER;
+inline void *Sexy_SOUND_LOADINGBAR_ZOMBIE;
+inline void *Sexy_IMAGE_ESRB_RATING_Addr;
+inline void *AGViewAddEventListenerAddr;
+inline void *AGViewRemoveEventListenerAddr;
+inline void *AGViewShowAddr;
+inline void *AGGetModelAddr;
+inline void *AGGetSdkVersionAddr;
+inline void *AGVideoPlayAddr;
+inline void *AGVideoOpenAddr;
+inline void *AGVideoShowAddr;
+inline void *AGVideoIsPlayingAddr;
+inline void *AGVideoCloseAddr;
 
 
 inline void *CreditScreen_RemovedFromManagerAddr;
@@ -1236,6 +1258,7 @@ inline void *SaveGameContext_SyncReanimationDefAddr;
 inline void *EffectSystem_EffectSystemInitializeAddr;
 
 inline void *TodFoley_PlayFoleyAddr;
+inline void *TodFoley_PlayFoleyPitchAddr;
 
 inline void *Sexy_Font_CharWidthKernAddr;
 
@@ -1435,17 +1458,34 @@ extern Image *&IMAGE_ZOMBIEIMPHEAD;
 
 extern MemoryImage *&IMAGE_BLANK;
 
-extern SexyAppBase *&gSexyAppBase;
+} // namespace Sexy
+
+// gSexyAppBase: initialized at runtime from libGameMain.so symbol _ZN4Sexy12gSexyAppBaseE
+// This is a pointer-to-pointer; dereference once to get SexyAppBase*.
+inline Sexy::SexyAppBase **Sexy_gSexyAppBase_ptr = nullptr;
+namespace Sexy {
+    // gSexyAppBase behaves like Sexy::SexyAppBase* — dereference Sexy_gSexyAppBase_ptr
+    inline Sexy::SexyAppBase *&gSexyAppBase = *Sexy_gSexyAppBase_ptr;
 } // namespace Sexy
 
 extern EffectSystem *&gEffectSystem;
 extern FoleyParams (&gLawnFoleyParamArray)[FoleyType::NUM_FOLEY];
-extern FoleyParams *&gFoleyParamArray;
-extern int &gFoleyParamArraySize;
+// gFoleyParamArray and gFoleyParamArraySize: initialized at runtime from libGameMain.so
+inline FoleyParams **gFoleyParamArray_ptr = nullptr;
+inline int *gFoleyParamArraySize_ptr = nullptr;
+#define gFoleyParamArray (*gFoleyParamArray_ptr)
+#define gFoleyParamArraySize (*gFoleyParamArraySize_ptr)
+
+inline char *gInAssert_ptr = nullptr;
+#define gInAssert (*gInAssert_ptr)
+inline void (*_assert2_ptr)(const char *, int, const char *, const char *) = nullptr;
+#define _assert2 (*_assert2_ptr)
 extern LawnApp *&gLawnApp;
 extern ReanimationParams (&gLawnReanimationArray)[ReanimationType::NUM_REANIMS];
 extern ReanimatorDefinition *&gReanimatorDefArray;
 extern char *&ReanimTrackId_anim_head1;
+
+// TodFoley hook addresses already declared above at line ~1257
 
 inline void *vTableForCursorObjectAddr;
 inline void *vTableForBoardAddr;
@@ -1491,6 +1531,17 @@ inline void *j_AGVideoPauseAddr;
 inline void *j_AGVideoResumeAddr;
 inline void *j_AGVideoStopAddr;
 inline void *j_AGVideoCloseAddr;
+
+Sexy::Image *GetTitleScreenImage();
+Sexy::Image *GetImageLoadBarDirt();
+Sexy::Image *GetImageLoadBarGrass();
+Sexy::Image *GetImageTitleScreenBall();
+Sexy::Image *GetImageTitleScreenGlow();
+Sexy::Image *GetImagePvzLogo();
+Sexy::Image *GetImageReanimSodrollCap();
+Sexy::Font *GetFontHouseOfTerror20();
+Sexy::Image *GetImageEsrbRating();
+Sexy::Font *GetFontDwarvenTodcraft24();
 
 bool LoadGameMain();
 bool LoadNativeCode();

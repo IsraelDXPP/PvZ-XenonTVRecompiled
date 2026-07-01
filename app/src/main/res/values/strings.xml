@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Plants Vs Zombies</string>
+    <string name="pvz_name">Plants Vs Zombies</string>
     <string name="close">Close</string>
     <string name="minimize">Minimize</string>
     <string name="about">About</string>

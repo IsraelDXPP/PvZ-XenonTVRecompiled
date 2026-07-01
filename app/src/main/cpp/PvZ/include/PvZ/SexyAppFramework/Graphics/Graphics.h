@@ -168,15 +168,21 @@ public:
         reinterpret_cast<void (*)(Graphics *, const Rect &, Image *)>(Sexy_DrawImageBoxAddr)(this, theRect, theImage);
     }
 
-    void SetFont(Font *theFont);
+    void SetFont(Font *theFont) {
+        reinterpret_cast<void (*)(Graphics *, Font *)>(Sexy_Graphics_SetFontAddr)(this, theFont);
+    }
     Font *GetFont();
-    void SetColor(const Color &theColor);
+    void SetColor(const Color &theColor) {
+        reinterpret_cast<void (*)(Graphics *, const Color &)>(Sexy_Graphics_SetColorAddr)(this, theColor);
+    }
     const Color &GetColor();
     void SetDrawMode(DrawMode theDrawMode);
     int GetDrawMode();
     void SetColorizeImages(bool colorizeImages);
     bool GetColorizeImages();
-    void SetLinearBlend(bool linear); // for DrawImageMatrix, DrawImageTransform, etc...
+    void SetLinearBlend(bool linear) {
+        reinterpret_cast<void (*)(Graphics *, bool)>(Sexy_Graphics_SetLinearBlendAddr)(this, linear);
+    }
     bool GetLinearBlend();
     void Translate(int theTransX, int theTransY);
     void TranslateF(float theTransX, float theTransY);

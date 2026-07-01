@@ -11,7 +11,7 @@
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
 
         <activity
-            android:name="com.transmension.mobile.MainActivity"
+            android:name="com.trans.pvz.GameLauncher"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|uiMode|fontWeightAdjustment|screenLayout|screenSize|smallestScreenSize|fontScale|density|touchscreen|mcc|mnc|colorMode|layoutDirection|locale|keyboardHidden|keyboard|navigation"
             android:exported="true"
@@ -25,6 +25,22 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
+        </activity>
+
+        <activity
+            android:name="com.trans.SetActivityEntrance"
+            android:configChanges="orientation|uiMode|fontWeightAdjustment|screenLayout|screenSize|smallestScreenSize|fontScale|density|touchscreen|mcc|mnc|colorMode|layoutDirection|locale|keyboardHidden|keyboard|navigation"
+            android:exported="true"
+            android:label="@string/pvz_name"
+            android:screenOrientation="sensorLandscape">
+        </activity>
+
+        <activity
+            android:name="com.trans.UnzipActivity"
+            android:configChanges="orientation|uiMode|fontWeightAdjustment|screenLayout|screenSize|smallestScreenSize|fontScale|density|touchscreen|mcc|mnc|colorMode|layoutDirection|locale|keyboardHidden|keyboard|navigation"
+            android:exported="false"
+            android:label="@string/pvz_name"
+            android:screenOrientation="sensorLandscape">
         </activity>
 
         <meta-data

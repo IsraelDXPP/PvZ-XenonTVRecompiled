@@ -27,7 +27,7 @@
 #include <unordered_set>
 
 homura::SharedObjLoader::SharedObjLoader(const char *filename)
-    : handle_{dlopen(filename, RTLD_NOW | RTLD_NOLOAD)} {
+    : handle_{dlopen(filename, RTLD_NOW)} {
     if (!IsOpen()) {
         LOG_ERROR("Failed to load shared library '{}': {}", filename, dlerror());
     }

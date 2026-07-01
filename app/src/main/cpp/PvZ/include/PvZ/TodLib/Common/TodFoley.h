@@ -22,7 +22,9 @@
 
 #include "PvZ/Lawn/Common/ConstEnums.h"
 #include "PvZ/Lawn/Common/Resources.h"
-#include "PvZ/Symbols.h"
+#include "PvZ/SexyAppFramework/Sound/SoundInstance.h"
+#include "PvZ/SexyAppFramework/Sound/SoundManager.h"
+
 
 inline constexpr int MAX_FOLEY_TYPES = 110;
 inline constexpr int MAX_FOLEY_INSTANCES = 8;
@@ -50,35 +52,41 @@ auto GetNewLawnFoleyParamArray() -> FoleyParams (&)[FoleyType::EXTENDED_NUM_FOLE
 
 class FoleyInstance {
 public:
-    int *mInstance;
+    Sexy::SoundInstance *mInstance;
     int mRefCount;
     bool _paused;
     int mStartTime;
     int mPauseOffset;
+
+    FoleyInstance();
 };
 
 struct FoleyTypeData {
     FoleyInstance mFoleyInstances[MAX_FOLEY_INSTANCES];
     int mLastVariationPlayed;
+
+    FoleyTypeData();
 };
 
 class TodFoley {
 public:
     FoleyTypeData mTypeData[MAX_FOLEY_TYPES];
 
-    bool IsFoleyPlaying(FoleyType theFoleyType) {
-        return reinterpret_cast<bool (*)(TodFoley *, FoleyType)>(TodFoley_IsFoleyPlayingAddr)(this, theFoleyType);
-    }
-    void StopFoley(FoleyType theFoleyType) {
-        reinterpret_cast<void (*)(TodFoley *, FoleyType)>(TodFoley_StopFoleyAddr)(this, theFoleyType);
-    }
-    void CancelPausedFoley() {
-        reinterpret_cast<void (*)(TodFoley *)>(TodFoley_CancelPausedFoleyAddr)(this);
-    }
+    bool IsFoleyPlaying(FoleyType theFoleyType);
+    void StopFoley(FoleyType theFoleyType);
+    void CancelPausedFoley();
+    void GamePause(bool thePause);
+    void RehookupSoundWithMusicVolume();
+    FoleyInstance *PlayFoley(FoleyType theFoleyType);
+    FoleyInstance *PlayFoleyPitch(FoleyType theFoleyType, float thePitch);
+    void ApplyMusicVolume(FoleyInstance *theFoleyInstance);
 };
 
-inline FoleyInstance *SoundSystemFindInstance(TodFoley *theSoundSystem, FoleyType theFoleyType) {
-    return reinterpret_cast<FoleyInstance *(*)(TodFoley *, FoleyType)>(SoundSystemFindInstanceAddr)(theSoundSystem, theFoleyType);
-}
+// SoundSystemFindInstance and helpers: reimplemented in TodFoley.cpp
+FoleyInstance *SoundSystemFindInstance(TodFoley *theSoundSystem, FoleyType theFoleyType);
+FoleyInstance *SoundSystemGetFreeInstanceIndex(TodFoley *theSoundSystem, FoleyType theFoleyType);
+bool SoundSystemHasFoleyPlayedTooRecently(TodFoley *theSoundSystem, FoleyType theFoleyType);
+void SoundSystemReleaseFinishedInstances(TodFoley *theSoundSystem);
+void TodFoleyDispose();
 
 #endif // PVZ_SEXYAPPFRAMEWORK_TODLIB_COMMON_TOD_FOLEY_H

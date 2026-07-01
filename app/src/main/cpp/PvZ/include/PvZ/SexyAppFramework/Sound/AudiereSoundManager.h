@@ -1,35 +1,65 @@
-/*
- * Copyright (C) 2023-2026  PvZ TV Touch Team
- *
- * This file is part of PlantsVsZombies-AndroidTV.
- *
- * PlantsVsZombies-AndroidTV is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * PlantsVsZombies-AndroidTV is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * PlantsVsZombies-AndroidTV.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 #ifndef PVZ_SEXYAPPFRAMEWORK_SOUND_AUDIERE_SOUND_MANAGER_H
 #define PVZ_SEXYAPPFRAMEWORK_SOUND_AUDIERE_SOUND_MANAGER_H
 
 #include "PvZ/STL/pvzstl_string.h"
-#include "PvZ/Symbols.h"
+#include "SoundManager.h"
+#include "OutputStream.h"
+#include "audiere/AudioTypes.h"
 
 namespace Sexy {
 
-class AudiereSoundManager {
+class AudiereSoundInstance;
+
+struct AudiereSoundInfo {
+    audiere::SampleSource *mSource;
+    int mDataSize;
+    int mSampleRate;
+    int mChannels;
+    int mBitsPerSample;
+
+    AudiereSoundInfo();
+};
+
+class AudiereSoundManager : public SoundManager {
 public:
-    int LoadSound(const pvzstl::string &theFileName) {
-        return reinterpret_cast<int (*)(AudiereSoundManager *, const pvzstl::string &)>(Sexy_AudiereSoundManager_LoadSoundAddr)(this, theFileName);
-    }
+    AudiereSoundManager();
+    ~AudiereSoundManager() override;
+
+    int LoadSound(const pvzstl::string &theFileName) override;
+    int LoadSound(int theSfxID, const pvzstl::string &theFileName) override;
+    int GetFreeSoundId() override;
+    int GetNumSounds() override;
+    void StopAllSounds() override;
+    SoundInstance *GetSoundInstance(int theSfxID) override;
+    void SetVolume(double theVolume) override;
+    void SetMasterVolume(double theVolume) override;
+    double GetMasterVolume() override;
+    int SetBaseVolume(int theSfxID, double theBase) override;
+    int SetBasePan(int theSfxID, int thePan) override;
+    int SetBasePitch(int theSfxID, float thePitch) override;
+    bool IsPlaying(int theSfxID) override;
+    SoundInstance *GetPlayingSoundInstance(int theSfxID) override;
+    void ReleaseChannels() override;
+    void ReleaseFreeChannels() override;
+    bool Initialized() override;
+    int FindFreeChannel() override;
+
+    float GetMasterVolumeFloat() const { return mMasterVolume; }
+    audiere::AndroidAudioDevice *GetAudioDevice() const { return mAudioDevice; }
+    void ImportFromBinary();
+    void ImportSoundFromBinary(int slot);
+
+    static const int MAX_SOUNDS = 256;
+    static const int MAX_CHANNELS = 32;
+
+    AudiereSoundInfo mSoundInfo[MAX_SOUNDS];
+    float mBaseVolume[MAX_SOUNDS];
+    int mBasePan[MAX_SOUNDS];
+    float mBasePitch[MAX_SOUNDS];
+    AudiereSoundInstance *mChannels[MAX_CHANNELS];
+    int mChannelIds[MAX_CHANNELS];
+    float mMasterVolume;
+    audiere::AndroidAudioDevice *mAudioDevice;
 };
 
 } // namespace Sexy

@@ -52,7 +52,7 @@ public:
     int unkMem2[70];                        // 166 ~ 235, musicinterface 193
     bool mLawnMouseMode;                    // 944
     int unkMem3[77];                        // 237 ~ 313
-    AudiereSoundManager *mSoundManager;     // 314
+    AudiereSoundManager *mSoundManager;     // field 290 = byte offset 1160
     int unkMem4[39];                        // 315 ~ 353
     int mNumLoadingThreadTasks;             // 354
     int mCompletedLoadingThreadTasks;       // 355

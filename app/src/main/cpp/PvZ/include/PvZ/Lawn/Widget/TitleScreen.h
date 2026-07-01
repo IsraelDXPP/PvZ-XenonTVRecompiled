@@ -79,6 +79,7 @@ inline void (*old_TitleScreen_Update)(TitleScreen *titleScreen);
 
 inline void (*old_TitleScreen_TitleScreen)(TitleScreen *titleScreen, LawnApp *);
 
+inline void (*old_TitleScreen_SwitchState)(TitleScreen *titleScreen, TitleScreen::TitleState state, int duration);
 
 void TitleScreen_Draw(TitleScreen *titleScreen, Sexy::Graphics *graphics);
 

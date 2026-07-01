@@ -7,8 +7,8 @@
         android:shortcutShortLabel="@string/app_name">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.transmension.mobile.MainActivity"
-            android:targetPackage="com.trans.pvztv" />
+            android:targetClass="com.trans.pvz.GameLauncher"
+            android:targetPackage="com.trans.pvz" />
         <categories android:name="android.shortcut.conversation" />
         <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
     </shortcut>

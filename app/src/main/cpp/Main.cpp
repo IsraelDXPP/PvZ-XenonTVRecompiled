@@ -17,21 +17,60 @@
  * PlantsVsZombies-AndroidTV.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <dlfcn.h>
+#include <android/log.h>
+
 #include "Homura/ExceptionUtils.h"
 #include "Homura/MemoryUtils.h"
 #include "PvZ/GlobalVariable.h"
 #include "PvZ/HookInit.h"
 #include "PvZ/Symbols.h"
 
-[[gnu::constructor(102)]] static void LibMain() {
+#define LOG_TAG "HomuraMain"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+__attribute__((constructor)) static void LibMain() {
+    LOGI("LibMain() called");
+
     homura::RegisterExceptionHandler();
     homura::RegisterAccessViolationHandler();
 
+    // libGameLauncher might already be loaded by Java (System.loadLibrary)
+    void* handle1 = dlopen("libGameLauncher.so", RTLD_LAZY | RTLD_NOLOAD);
+    if (handle1) {
+        LOGI("libGameLauncher.so already loaded (by Java)");
+    } else {
+        handle1 = dlopen("libGameLauncher.so", RTLD_NOW | RTLD_GLOBAL);
+        if (handle1) {
+            LOGI("libGameLauncher.so loaded via dlopen");
+        } else {
+            LOGE("dlopen(libGameLauncher) failed: %s", dlerror());
+        }
+    }
+
+    void* handle2 = dlopen("libGameMain.so", RTLD_LAZY | RTLD_NOLOAD);
+    if (handle2) {
+        LOGI("libGameMain.so already loaded");
+    } else {
+        handle2 = dlopen("libGameMain.so", RTLD_NOW | RTLD_GLOBAL);
+        if (handle2) {
+            LOGI("libGameMain.so loaded via dlopen");
+        } else {
+            LOGE("dlopen(libGameMain) failed: %s", dlerror());
+        }
+    }
+
     gLibGameMainBaseAddr = homura::GetLibBaseAddr("libGameMain.so");
-    assert(gLibGameMainBaseAddr != 0);
+    if (gLibGameMainBaseAddr == 0) {
+        LOGE("GetLibBaseAddr(libGameMain) returned 0");
+    }
 
     if (InitSymbols()) {
+        LOGI("InitSymbols() succeeded, calling CallHook()");
         CallHook();
+    } else {
+        LOGE("InitSymbols() failed");
     }
 }
 

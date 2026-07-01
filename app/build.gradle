@@ -21,9 +21,9 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.trans.pvztv"
+    namespace = "com.trans.pvz"
     ndkVersion = "27.2.12479018"
-    compileSdk = 34
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.trans.pvztv"

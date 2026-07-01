@@ -3,4 +3,6 @@
 
 // Stub: Netplay mod code removed for reconstruction.
 
+struct BaseEvent;
+
 #endif
