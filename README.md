@@ -1,39 +1,55 @@
 # PvZ XenonTV Recompiled
 
-Decompilación progresiva del sistema de audio de Plants vs. Zombies para Android ARM nativo.
+<p align="center">
+  <img src="https://img.shields.io/badge/status-en%20desarrollo-yellow" alt="Status">
+  <img src="https://img.shields.io/badge/plataforma-Android%20ARM-blue" alt="Platform">
+  <img src="https://img.shields.io/badge/licencia-GPL--3.0-green" alt="License">
+</p>
 
-## Objetivo
+<p align="center">
+  <b>Reconstrucción progresiva de Plants vs. Zombies Android TV desde cero.</b><br>
+  <i>Sin wrappers, sin dependencias del binario original, sin humo.</i>
+</p>
 
-Reemplazar todo el sistema de audio propietario del binario original (AudiereSoundManager, AudiereSoundInstance, codecs Ogg/Vorbis, backend OpenAL) con una reimplementación en C++ limpia y descompilada, usando OpenSL ES como backend nativo de Android.
+---
 
-## Estado actual
+## 🎯 Objetivo
 
-- ✅ AudiereSoundManager (256 slots, 32 canales) — descompilado 1:1
-- ✅ AudiereSoundInstance (volumen, pitch, pan, play/stop/release) — descompilado
-- ✅ OpenSL ES backend (buffer queue doble, 2048 frames) — funcional
-- ✅ MixerDevice / MixerStream / Resampler / WAVSource — pipeline de audio completo
-- ✅ PlaySample / PlaySampleSingle hooks (4 puntos de entrada) — redirigidos a nuestro SM
-- ✅ TodFoley migrado a llamadas directas (sin vtable del binario)
-- ✅ Importación de PCM desde el binario (decodeBuffer y WAVInputStream)
-- ❌ Sonido se corta / calidad pobre — en depuración
+Descompilar **todo** el juego — no solo parchear, no solo wrappear, no solo el audio. Reimplementar cada subsistema del binario original en C++ limpio y legible, manteniendo compatibilidad 1:1 con la lógica original, hasta que el binario deje de ser necesario.
 
-## Próximos pasos
+| Componente | Estado |
+|-----------|--------|
+| 🎵 Sistema de audio | ✅ Descompilado (OpenSL ES) |
+| 🎮 GLSurfaceView / GameView | 🔄 En progreso |
+| 🧵 Game thread / loop | ❌ Pendiente |
+| 📦 Gestión de assets | ❌ Pendiente |
+| 🖥️ Render pipeline | ❌ Pendiente |
+| 📝 Input / touch | ❌ Pendiente |
 
-1. Corregir la reproducción completa de los sonidos (se cortan antes de terminar)
-2. Sincronización de volúmenes en tiempo real
-3. Mezcla de Foley (varias instancias simultáneas del mismo sonido)
-4. Soporte Ogg Vorbis nativo (sin depender del decodeBuffer del binario)
+## 🏗️ Estructura del proyecto
 
-## Build
+```
+app/src/main/cpp/PvZ/
+├── include/PvZ/SexyAppFramework/   # Headers descompilados
+├── src/SexyAppFramework/           # Implementaciones nativas (audio, etc.)
+├── src/Android/                    # Backend Android (OpenSL ES, JNI)
+├── src/HookInit.cpp                # Punto de entrada de hooks al binario
+└── src/TodFoley.cpp                # Foley descompilado sin vtable
+```
+
+## 🛠️ Build
 
 ```sh
 ./gradlew assembleDebug
 ```
 
-Requiere Android SDK Platform 34, NDK r27c, CMake 3.20+.
+**Requisitos:**
+- Android SDK Platform 34
+- NDK r27c
+- CMake 3.20+
 
-Recursos del juego (assets/) no incluidos — copiar desde la instalación original de PvZ Android TV.
+Los assets del juego (`app/src/main/assets/`) deben copiarse desde una instalación original de PvZ Android TV — no se distribuyen en este repositorio.
 
-## Licencia
+## 📜 Licencia
 
-GPL-3.0. Proyecto no afiliado con Transmension, PopCap o Electronic Arts.
+GPL-3.0. Proyecto no afiliado con Transmension, PopCap Games ni Electronic Arts.
