@@ -1,76 +1,78 @@
-<div align="center">
+# PvZ XenonTV Recompiled
 
-# PlantsVsZombies AndroidTV
+[English](./README.md) | **简体中文**
 
-**[English](./README.md)** | **简体中文**
+从零开始逐步重建 Plants vs. Zombies Android TV 版。
+无包装、无原始二进制依赖、无黑箱。
 
-[![license](https://img.shields.io/github/license/Dicot0721/PlantsVsZombies-AndroidTV)][GPL-3.0]
-[![Android CI](https://github.com/Dicot0721/PlantsVsZombies-AndroidTV/actions/workflows/android.yml/badge.svg)](https://github.com/Dicot0721/PlantsVsZombies-AndroidTV/actions/workflows/android.yml "Android CI")
+## 反编译方法
 
-一个基于植物大战僵尸 TV 版的改版.
+本项目通过渐进式替换来反编译 `libGameMain.so` (ARM32)：
 
-</div>
+1. **静态分析**：使用 Hex-Rays IDA 9.3 反编译二进制文件。
+   原始输出位于 [`pseudocode/libGameMain.so.c`](../pseudocode/libGameMain.so.c)
+   （约 82.3 万行），作为原始逻辑的参考。
+
+2. **符号映射**：每个二进制函数在
+   [`Symbols.h`](../app/src/main/cpp/PvZ/include/PvZ/Symbols.h) 中声明为
+   `void *` 指针。地址在运行时通过 `libGameMain.so` 基址偏移解析。
+
+3. **Hook 机制**：[`Homura`](../app/src/main/cpp/Homura) 框架提供
+   `HookFunction<T>()` 来拦截二进制调用。每个 hook 将执行重定向到
+   干净的 C++ 重新实现。若需原始行为，可调用 hook 前保存的 `old_*` 指针。
+
+4. **渐进式重实现**：每个子系统从 *stub*（带有待解析 `Addr` 的骨架）开始。
+   反编译完成后，替换为不依赖原始二进制的原生 C++ 代码。
+
+5. **验证**：重新实现必须与原始逻辑 1:1 一致。只改变架构，不改变游戏玩法。
+
+Hook 函数典型流程：
+```
+调用二进制 → hook 拦截 → 执行原生 C++ → （可选）调用 old_* 以使用原始函数
+```
 
 ## 构建
 
-- 确保已安装下列组件:
-    * Android SDK Platform 34
-    * NDK v27.2.12479018 (r27c)
-    * CMake v3.20+
+```sh
+./gradlew assembleDebug
+```
 
-- 克隆仓库.
-    ```sh
-    git clone https://github.com/Dicot0721/PlantsVsZombies-AndroidTV.git
-    cd PlantsVsZombies-AndroidTV
-    ```
+需要 Android SDK Platform 34、NDK r27c、CMake 3.20+。
+游戏资源文件（`app/src/main/assets/`）不包含在此仓库中。
 
-- 复制 assets 文件到路径 `PlantsVsZombies-AndroidTV/app/src/main/assets/` 下.
-    > 需要资源文件请联系仓库作者.
+## 编码风格 (C++)
 
-- 构建方式:
-    * Android Studio: 点击构建按钮.
-    * 命令行: 运行以下命令:
-        ```sh
-        cd PlantsVsZombies-AndroidTV
-        ```
+### 命名约定
 
-- 如果要发布, 先在位于项目根目录的 `keystore.properties` 文件 (需要自行创建) 中配置签名. 文件内容样式如下:
-    ```properties
-    storePassword=myStorePassword
-    keyPassword=mykeyPassword
-    keyAlias=myKeyAlias
-    storeFile=myStoreFileLocation
-    ```
+| 元素 | 约定 | 示例 |
+|------|------|------|
+| 函数 / 类型 / 概念 | PascalCase | `DrawShadow`, `GetCost`, `GameObject` |
+| 变量 | camelCase | `mSeedType`, `theGridX`, `gKeyDown` |
+| 命名空间 | snake_case | `sexy`, `homura`, `audiere`, `pvzstl` |
+| 宏 / 常量 / 枚举成员 / 非类型模板参数 | UPPER_CASE | `BOARD_WIDTH`, `ADVICE_NONE`, `PVZ_SYMBOLS_H` |
 
-## 参与贡献
+#### 附加约定
 
-### 编码风格 (C++)
+- **Include guards**：`PVZ_` + 路径的 UPPER_SNAKE_CASE
+  （例如 `PVZ_LAWN_BOARD_GAME_OBJECT_H`）
+- **原始函数指针**：前缀 `old_` + PascalCase
+  （例如 `old_PlaySample`, `old_Plant_Draw`）
+- **符号地址**：后缀 `Addr` + PascalCase
+  （例如 `Board_UpdateAddr`, `TodAnimateCurveAddr`）
 
-#### 命名约定
+### 格式
 
-- 函数/类型/概念: `PascalCase`
-- 变量: `camelCase`
-- 命名空间: `snake_case`
-- 宏/常量/枚举成员/非类型模板参数: `UPPER_CASE`
-
-#### 格式
-
-见 [`.clang-format`](/.clang-format).
-
-> 建议在每次提交前先用 IDE 对代码进行格式化.
+见 [`.clang-format`](../.clang-format)。
+建议在每次提交前使用 clang-format 格式化代码。
 
 ### 提交
 
-参考[约定式提交](https://www.conventionalcommits.org/zh-hans/v1.0.0/).
+遵循[约定式提交](https://www.conventionalcommits.org/zh-hans/v1.0.0/)。
 
-### 拉取请求 (PR)
+### 拉取请求
 
-发送 PR 到 `dev` 分支.
+发送 PR 到 `dev` 分支。
 
 ## 许可协议
 
-本项目的源代码使用 [GPL-3.0][GPL-3.0] 许可进行授权.
-
-本项目与渡维科技、宝开或艺电无关, 也未获得他们的认可.
-
-[GPL-3.0]: https://www.gnu.org/licenses/gpl-3.0.html "GPL-3.0"
+GPL-3.0。本项目与渡维科技、宝开或艺电无关，也未获得他们的认可。
